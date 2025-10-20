@@ -312,15 +312,6 @@ everydayelastic/
 
 Ready to deploy? See the **Cloud Run Deployment** section above for step-by-step instructions to get your backend and frontend live on Google Cloud. Complete infrastructure-as-code with secrets management, auto-scaling, and monitoring built in.
 
-## 📚 Additional Resources
-
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Detailed architecture diagrams and data flow
-- **[DEVPOST.md](./DEVPOST.md)** - Full hackathon submission with technical deep dive
-
-## 🤝 Contributing
-
-Found a bug? Have a feature idea? Contributions are welcome! Please open an issue or submit a PR.
-
 ## 📝 License
 
 MIT License - see LICENSE file for details.
