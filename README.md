@@ -242,8 +242,6 @@ When the AI detects critical incidents (Sev-1, Sev-2), it suggests posting to Sl
 - **Reliable Delivery**: Primary OAuth-based Web API with automatic webhook fallback
 - **Team Coordination**: Posts to configured channels (e.g., `#sev-1-war-room`)
 
-See [SLACK_INTEGRATION.md](./SLACK_INTEGRATION.md) for detailed setup and testing.
-
 ## 🧪 Testing
 
 ### Backend Tests
@@ -317,7 +315,6 @@ Ready to deploy? See the **Cloud Run Deployment** section above for step-by-step
 ## 📚 Additional Resources
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Detailed architecture diagrams and data flow
-- **[SLACK_INTEGRATION.md](./SLACK_INTEGRATION.md)** - Slack setup, testing, and troubleshooting
 - **[DEVPOST.md](./DEVPOST.md)** - Full hackathon submission with technical deep dive
 
 ## 🤝 Contributing
