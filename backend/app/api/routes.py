@@ -154,27 +154,51 @@ async def _gather_references(
 def _build_system_prompt() -> str:
     return (
         "You are EverydayElastic, an enterprise IT and operations copilot. "
+        "Maintain conversation context and build on previous exchanges naturally. "
         "Use the retrieved tickets, policies, playbooks, and chat transcripts to provide concise, "
         "actionable incident triage and operational guidance. Cite sources inline using [#]. "
         "When analyzing incidents, highlight severity, affected services, owners, and next steps. "
+        "If the user provides additional details (like a service name or provider), integrate them into your analysis "
+        "rather than asking for clarification again. "
         "Recommend follow-up actions (e.g., create Jira task, notify Slack channel, review policy) when appropriate. "
-        "If context is insufficient, explicitly state what additional data is needed."
+        "Only ask for more information if it's truly unavailable in both the conversation history and retrieved context."
     )
 
 
-async def _generate_answer(user_question: str, context: str, locale: str | None = None) -> str:
+async def _generate_answer(
+    user_question: str, 
+    context: str, 
+    conversation_history: list[ChatMessage] | None = None,
+    locale: str | None = None
+) -> str:
     if not vertex_client.enabled:
         return (
-            "Vertex AI isn’t configured yet, so I can’t draft a full triage response. "
+            "Vertex AI isn't configured yet, so I can't draft a full triage response. "
             "Use the retrieved context snippets for manual follow-up in the meantime."
         )
 
+    # Build conversation context from history
+    conversation_context = ""
+    if conversation_history:
+        # Get last 5 messages for context (to avoid token limits)
+        recent_messages = conversation_history[-5:] if len(conversation_history) > 5 else conversation_history
+        history_lines = []
+        for msg in recent_messages:
+            role_label = "User" if msg.role == "user" else "Assistant"
+            history_lines.append(f"{role_label}: {msg.content}")
+        if history_lines:
+            conversation_context = "Previous conversation:\n" + "\n".join(history_lines) + "\n\n"
+
     prompt = (
+        f"{conversation_context}"
         "Context documents:\n"
         f"{context or 'No external documents available.'}\n\n"
-        "Task: Act as an IT/ops analyst. Provide an answer with citations such as [1], [2], "
-        "highlighting current status, relevant runbooks, and recommended next actions.\n"
-        f"User question: {user_question}"
+        "Task: Act as an IT/ops analyst. Use the previous conversation to maintain context. "
+        "Provide an answer with citations such as [1], [2], "
+        "highlighting current status, relevant runbooks, and recommended next actions. "
+        "If the user is providing additional information (like specifying a provider or service), "
+        "incorporate it into your previous response rather than asking for clarification again.\n"
+        f"Current user question: {user_question}"
     )
 
     try:
@@ -221,7 +245,11 @@ async def create_chat_completion(request: ChatRequest) -> ChatResponse:
     try:
         locale = request.locale
         references, context, hits = await _gather_references(last_user.content, locale)
-        answer = await _generate_answer(last_user.content, context, locale)
+        
+        # Pass conversation history excluding the current user message for context
+        conversation_history = [msg for msg in request.messages if msg != last_user]
+        answer = await _generate_answer(last_user.content, context, conversation_history, locale)
+        
         follow_ups = []
         if references and elastic_client.enabled and hits:
             follow_ups = await suggest_follow_up(elastic_client, last_user.content, hits)

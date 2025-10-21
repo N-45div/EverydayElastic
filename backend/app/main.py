@@ -9,7 +9,12 @@ from .core.logging_config import setup_logging
 from .core.metrics import REQUEST_LATENCY
 
 from .api.routes import router as chat_router
-from .dependencies import elastic_client, lifespan, vertex_client
+from .dependencies import (
+    configure_tracing,
+    elastic_client,
+    lifespan,
+    vertex_client,
+)
 
 setup_logging()
 
@@ -28,6 +33,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
 
 app = FastAPI(title="EverydayElastic API", version="0.1.0", lifespan=lifespan)
+configure_tracing(app)
 app.add_middleware(MetricsMiddleware)
 
 app.add_middleware(
@@ -36,7 +42,11 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://localhost:3000",
+        # Allow Cloud Run frontend deployments
+        "https://everydayelastic-classi16-dztgcxd3oq-uc.a.run.app",
+        "https://everyday-elastic.vercel.app"
     ],
+    allow_origin_regex=r"https://.*\.run\.app",  # Allow all Cloud Run domains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

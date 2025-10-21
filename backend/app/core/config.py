@@ -25,8 +25,14 @@ class Settings(BaseSettings):
     slack_webhook_url: str | None = None
     slack_access_token: str | None = None
     slack_refresh_token: str | None = None
+    slack_client_id: str | None = None
+    slack_client_secret: str | None = None
     default_slack_channel: str = "#sev-1-war-room"
     locale_index_overrides: dict[str, str] = Field(default_factory=dict)
+    enable_tracing: bool = False
+    otel_exporter_endpoint: str | None = None
+    otel_exporter_headers: str | None = None
+    otel_exporter_insecure: bool = False
 
 
 settings = Settings()
