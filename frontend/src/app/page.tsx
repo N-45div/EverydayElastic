@@ -106,7 +106,7 @@ export default function Home() {
                 Pull recent incident tickets, playbooks, and chat transcripts to understand severity, impacted services, and on-call owners.
               </p>
               <p className="text-sm text-blue-600 font-mono bg-white rounded-lg px-4 py-2">
-                "Show me Sev-1 incidents from the last 24 hours"
+                &quot;Show me Sev-1 incidents from the last 24 hours&quot;
               </p>
             </div>
             
@@ -116,7 +116,7 @@ export default function Home() {
                 Suggest Jira tasks, policy reminders, or Slack updates backed by the evidence surfaced in the retrieval step.
               </p>
               <p className="text-sm text-green-600 font-mono bg-white rounded-lg px-4 py-2">
-                "What's the runbook for payment gateway timeout?"
+                &quot;What&apos;s the runbook for payment gateway timeout?&quot;
               </p>
             </div>
             
@@ -126,7 +126,7 @@ export default function Home() {
                 Trigger webhooks or assign manual reviews with one click, keeping humans in the loop when judgment is required.
               </p>
               <p className="text-sm text-orange-600 font-mono bg-white rounded-lg px-4 py-2">
-                Copilot suggests: "Create Jira task" → Click → Done ✓
+                Copilot suggests: &quot;Create Jira task&quot; → Click → Done ✓
               </p>
             </div>
           </div>

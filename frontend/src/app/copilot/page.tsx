@@ -1,8 +1,8 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState, useRef, useEffect } from "react";
+import { FormEvent, useMemo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Send, Sparkles, Globe, Menu, Plus, Trash2 } from "lucide-react";
+import { Send, Sparkles, Menu, Plus, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -67,15 +67,12 @@ export default function CopilotPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([DEFAULT_ASSISTANT_MESSAGE]);
   const [sessionId, setSessionId] = useState<string | undefined>();
   const [input, setInput] = useState("");
-  const [locale, setLocale] = useState("en-US");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
-  const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const [semanticSearchEnabled, setSemanticSearchEnabled] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -200,15 +197,6 @@ export default function CopilotPage() {
     });
   };
 
-  const copyToClipboard = async (content: string, messageId: string) => {
-    try {
-      await navigator.clipboard.writeText(content);
-      setCopiedMessage(messageId);
-      setTimeout(() => setCopiedMessage(null), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
 
   const clearConversation = () => {
     if (currentConversationId) {
@@ -263,7 +251,7 @@ export default function CopilotPage() {
         body: JSON.stringify({
           session_id: sessionId,
           messages: optimisticMessages,
-          locale,
+          locale: "en-US",
         }),
         signal: controller.signal,
       });
@@ -541,7 +529,7 @@ export default function CopilotPage() {
         </section>
 
         <section className="grid gap-3 sm:grid-cols-3 mb-4">
-          {quickPrompts.map((prompt, idx) => (
+          {quickPrompts.map((prompt) => (
             <button
               key={prompt}
               type="button"
