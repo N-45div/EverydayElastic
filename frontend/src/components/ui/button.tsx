@@ -10,7 +10,7 @@ const baseStyles =
 const variantStyles: Record<Variant, string> = {
   default: "bg-emerald-500 text-slate-950 hover:bg-emerald-400",
   secondary: "bg-slate-900 text-slate-100 border border-slate-700 hover:bg-slate-800",
-  outline: "border border-slate-800 bg-transparent hover:bg-slate-900/60 text-slate-100",
+  outline: "border border-slate-300 bg-transparent text-slate-900 hover:bg-slate-100",
   ghost: "text-slate-300 hover:bg-slate-800",
   link: "text-emerald-400 underline-offset-4 hover:underline",
 }
@@ -49,6 +49,14 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const classes = buttonClasses(variant, size, className)
+
+  if (asChild && React.isValidElement(children)) {
+    const child = children as React.ReactElement<any>
+    return React.cloneElement(child, {
+      className: cn(child.props.className, classes),
+      ...rest,
+    })
+  }
 
   if (asChild) {
     return <span className={classes} {...rest}>{children}</span>

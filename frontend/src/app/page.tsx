@@ -1,30 +1,30 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { Search, Sparkles, Shield, Activity, CheckCircle2, Zap } from "lucide-react";
 
 const features = [
   {
     title: "Elastic-Native Retrieval",
     description:
       "Blend semantic search with curated runbooks, tickets, and policy libraries to answer the questions ops teams ask every day.",
+    Icon: Search,
   },
   {
     title: "Follow-Up Automation",
     description:
-      "Trigger Jira webhooks, post to Slack, or tee up human review with a single click when the copilot suggests next actions.",
+      "Post to Slack or tee up human review with a single click when the copilot suggests next actions.",
+    Icon: Sparkles,
   },
   {
     title: "Enterprise Guardrails",
     description:
       "Ground every response in auditable sources with reranking and track decisions with built-in logging so compliance teams stay confident.",
+    Icon: Shield,
   },
 ];
 
-const metrics = [
-  { label: "Tickets resolved faster", value: "32%" },
-  { label: "Policy lookups automated", value: "18x" },
-  { label: "Teams piloting EverydayElastic", value: "12" },
-];
+ 
 
 export default function Home() {
   return (
@@ -40,9 +40,6 @@ export default function Home() {
             </Link>
             <Link href="#use-cases" className="hover:text-blue-600 transition-colors">
               Use Cases
-            </Link>
-            <Link href="#metrics" className="hover:text-blue-600 transition-colors">
-              Metrics
             </Link>
           </div>
           <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -82,7 +79,10 @@ export default function Home() {
               key={feature.title}
               className="rounded-2xl border border-blue-200 bg-blue-50/50 p-8 transition hover:border-blue-400 hover:shadow-lg"
             >
-              <h2 className="text-xl font-bold text-blue-700 mb-3">
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-blue-200 bg-white text-blue-600">
+                <feature.Icon className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <h2 className="text-xl font-bold text-blue-700 mb-2">
                 {feature.title}
               </h2>
               <p className="text-sm text-gray-700 leading-relaxed">
@@ -101,6 +101,9 @@ export default function Home() {
           </div>
           <div className="space-y-6">
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-8">
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-blue-200 bg-white text-blue-700">
+                <Activity className="h-5 w-5" aria-hidden="true" />
+              </div>
               <h3 className="text-xl font-bold text-blue-700 mb-3">1. Detect & Scope</h3>
               <p className="text-gray-700 mb-4">
                 Pull recent incident tickets, playbooks, and chat transcripts to understand severity, impacted services, and on-call owners.
@@ -111,9 +114,12 @@ export default function Home() {
             </div>
             
             <div className="rounded-2xl border border-green-200 bg-green-50 p-8">
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-green-200 bg-white text-green-700">
+                <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+              </div>
               <h3 className="text-xl font-bold text-green-700 mb-3">2. Recommend Actions</h3>
               <p className="text-gray-700 mb-4">
-                Suggest Jira tasks, policy reminders, or Slack updates backed by the evidence surfaced in the retrieval step.
+                Suggest Slack updates, policy reminders, or internal follow-ups backed by the evidence surfaced in the retrieval step.
               </p>
               <p className="text-sm text-green-600 font-mono bg-white rounded-lg px-4 py-2">
                 &quot;What&apos;s the runbook for payment gateway timeout?&quot;
@@ -121,24 +127,31 @@ export default function Home() {
             </div>
             
             <div className="rounded-2xl border border-orange-200 bg-orange-50 p-8">
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-orange-200 bg-white text-orange-700">
+                <Zap className="h-5 w-5" aria-hidden="true" />
+              </div>
               <h3 className="text-xl font-bold text-orange-700 mb-3">3. Automate Follow-Through</h3>
               <p className="text-gray-700 mb-4">
                 Trigger webhooks or assign manual reviews with one click, keeping humans in the loop when judgment is required.
               </p>
               <p className="text-sm text-orange-600 font-mono bg-white rounded-lg px-4 py-2">
-                Copilot suggests: &quot;Create Jira task&quot; → Click → Done ✓
+                Copilot suggests: &quot;Create Slack request&quot; → Click → Done ✓
               </p>
             </div>
           </div>
         </section>
 
-        <section id="metrics" className="grid gap-8 rounded-3xl border border-blue-200 bg-blue-50 p-12 sm:grid-cols-3">
-          {metrics.map((metric) => (
-            <div key={metric.label} className="space-y-3 text-center">
-              <p className="text-5xl font-bold text-blue-600">{metric.value}</p>
-              <p className="text-sm font-medium text-gray-700 uppercase tracking-wide">{metric.label}</p>
-            </div>
-          ))}
+        <section id="about" className="rounded-3xl border border-gray-200 bg-white p-10">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">About EverydayElastic</h2>
+          <p className="text-gray-700 mb-4">
+            EverydayElastic is an ops copilot that combines Elasticsearch semantic retrieval with Google Vertex AI reranking to deliver cited answers and actionable follow-ups. It keeps humans in the loop with clear sources and simple controls.
+          </p>
+          <ul className="grid gap-4 sm:grid-cols-2 text-gray-700">
+            <li className="rounded-lg border border-gray-200 p-4">Semantic retrieval across runbooks, chat transcripts, policies, and docs.</li>
+            <li className="rounded-lg border border-gray-200 p-4">Reranked results with citations and optional relevance scores.</li>
+            <li className="rounded-lg border border-gray-200 p-4">Slack updates you can trigger directly from the chat.</li>
+            <li className="rounded-lg border border-gray-200 p-4">Audit-friendly logs and explicit source references.</li>
+          </ul>
         </section>
 
         <section className="rounded-3xl border border-blue-300 bg-gradient-to-br from-blue-600 to-blue-700 p-12 text-center text-white shadow-xl">
@@ -153,7 +166,7 @@ export default function Home() {
               <Link href="/copilot">Launch Demo Now →</Link>
             </Button>
             <Button variant="outline" size="lg" className="border-white text-white hover:bg-blue-500 px-8" asChild>
-              <Link href="https://github.com/yourusername/everydayelastic">View on GitHub</Link>
+              <Link href="https://github.com/N-45div/EverydayElastic">View on GitHub</Link>
             </Button>
           </div>
         </section>
