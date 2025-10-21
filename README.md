@@ -90,6 +90,12 @@ RERANKER_INFERENCE_ID="google_vertex_ai_rerank"
 VERTEX_MODEL="gemini-2.5-flash-lite"
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 
+# Observability (optional but recommended)
+ENABLE_TRACING=true
+OTEL_EXPORTER_ENDPOINT="https://<your-deployment>.apm.us-central1.gcp.cloud.es.io:443/v1/traces"
+OTEL_EXPORTER_HEADERS="Authorization=Bearer <elastic-apm-token>"
+OTEL_EXPORTER_INSECURE=false
+
 # Slack Integration (optional)
 SLACK_ACCESS_TOKEN=xoxe.xoxp-1-...
 SLACK_REFRESH_TOKEN=xoxe-1-...
@@ -188,8 +194,8 @@ gcloud run deploy ${SERVICE} \
   --region ${REGION} \
   --platform managed \
   --allow-unauthenticated \
-  --set-env-vars "VERTEX_PROJECT_ID=${PROJECT_ID},VERTEX_LOCATION=us-central1,VERTEX_MODEL=gemini-2.5-flash-lite,EMBEDDING_INFERENCE_ID=google_vertex_ai_embeddingss" \
-  --set-secrets "ELASTIC_ENDPOINT=elastic-endpoint:latest,ELASTIC_USERNAME=elastic-username:latest,ELASTIC_PASSWORD=elastic-password:latest" \
+  --set-env-vars "VERTEX_PROJECT_ID=${PROJECT_ID},VERTEX_LOCATION=us-central1,VERTEX_MODEL=gemini-2.5-flash-lite,EMBEDDING_INFERENCE_ID=google_vertex_ai_embeddings,RERANKER_INFERENCE_ID=google_vertex_ai_rerank" \
+  --set-secrets "ELASTIC_ENDPOINT=elastic-endpoint:latest,ELASTIC_USERNAME=elastic-username:latest,ELASTIC_PASSWORD=elastic-password:latest,SLACK_ACCESS_TOKEN=slack-access-token:latest,SLACK_REFRESH_TOKEN=slack-refresh-token:latest,SLACK_CLIENT_ID=slack-client-id:latest,SLACK_CLIENT_SECRET=slack-client-secret:latest,SLACK_WEBHOOK_URL=slack-webhook-url:latest,DEFAULT_SLACK_CHANNEL=default-slack-channel:latest,ENABLE_TRACING=enable-tracing:latest,OTEL_EXPORTER_ENDPOINT=otel-exporter-endpoint:latest,OTEL_EXPORTER_HEADERS=otel-exporter-headers:latest,OTEL_EXPORTER_INSECURE=otel-exporter-insecure:latest" \
   --service-account "vertex-runner@${PROJECT_ID}.iam.gserviceaccount.com"
 ```
 Mount the service-account JSON via Secret Manager or use Workload Identity Federation (recommended) instead of shipping raw keys.
