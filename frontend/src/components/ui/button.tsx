@@ -51,7 +51,7 @@ export function Button({
   const classes = buttonClasses(variant, size, className)
 
   if (asChild && React.isValidElement(children)) {
-    const child = children as React.ReactElement<any>
+    const child = children as React.ReactElement<{ className?: string }>
     return React.cloneElement(child, {
       className: cn(child.props.className, classes),
       ...rest,
