@@ -5,53 +5,53 @@
 ```mermaid
 graph TB
     subgraph "User Layer"
-        User[👤 User Browser]
-        Slack[💬 Slack Workspace]
+        User[User Browser]
+        Slack[Slack Workspace]
     end
 
     subgraph "Application Layer"
         subgraph "Frontend - Next.js 15.5.5"
-            Landing[🏠 Landing Page]
-            Copilot[💡 Copilot Interface]
-            ConvMgmt[📝 Conversation Management]
+            Landing[Landing Page]
+            Copilot[Copilot Interface]
+            ConvMgmt[Conversation Management]
         end
 
         subgraph "Backend - FastAPI 0.115.0"
-            Routes[🛣️ Chat Routes<br/>/chat/completions]
-            Actions[⚡ Actions Handler<br/>/chat/actions]
-            Status[📊 Integration Status<br/>/integrations/status]
+            Routes[Chat Routes<br/>/chat/completions]
+            Actions[Actions Handler<br/>/chat/actions]
+            Status[Integration Status<br/>/integrations/status]
             
             subgraph "Service Layer"
-                ElasticClient[🔍 Elasticsearch Client]
-                VertexClient[🤖 Vertex AI Client]
-                SlackClient[💬 Slack Client]
-                Workflows[⚙️ Workflows Engine]
+                ElasticClient[Elasticsearch Client]
+                VertexClient[Vertex AI Client]
+                SlackClient[Slack Client]
+                Workflows[Workflows Engine]
             end
             
-            Logging[📝 Structured Logging]
-            Metrics[📈 Prometheus Metrics]
+            Logging[Structured Logging]
+            Metrics[Prometheus Metrics]
         end
     end
 
     subgraph "External Services"
         subgraph "Elasticsearch Cloud"
-            ESIndex[(📚 knowledge-base index<br/>semantic_text + BM25)]
-            ESInference[🧠 Open Inference API<br/>Embeddings + Reranking]
+            ESIndex[(knowledge-base index<br/>semantic_text + BM25)]
+            ESInference[Open Inference API<br/>Embeddings + Reranking]
         end
 
         subgraph "Google Vertex AI"
-            Gemini[✨ Gemini 2.5 Flash Lite<br/>Text Generation]
-            Embeddings[🔢 Embeddings API]
-            Reranking[📊 Reranking API]
+            Gemini[Gemini 2.5 Flash Lite<br/>Text Generation]
+            Embeddings[Embeddings API]
+            Reranking[Reranking API]
         end
 
-        SlackAPI[💬 Slack Web API<br/>chat.postMessage<br/>Block Kit]
+        SlackAPI[Slack Web API<br/>chat.postMessage<br/>Block Kit]
     end
 
     subgraph "Infrastructure"
-        CloudRun[☁️ Google Cloud Run]
-        SecretMgr[🔐 Secret Manager]
-        CloudLog[📋 Cloud Logging]
+        CloudRun[Google Cloud Run]
+        SecretMgr[Secret Manager]
+        CloudLog[Cloud Logging]
     end
 
     %% User interactions
@@ -93,18 +93,30 @@ graph TB
     Backend -.->|Deployed on| CloudRun
     Backend -.->|Secrets| SecretMgr
 
-    style User fill:#e1f5ff
-    style Slack fill:#e1f5ff
-    style Frontend fill:#fff4e1
-    style Backend fill:#ffe1f5
-    style ElasticClient fill:#d4f1d4
-    style VertexClient fill:#d4f1d4
-    style SlackClient fill:#d4f1d4
-    style Workflows fill:#d4f1d4
-    style ESIndex fill:#f0e1ff
-    style Gemini fill:#f0e1ff
-    style SlackAPI fill:#f0e1ff
-    style CloudRun fill:#e1e1e1
+    %% Black & White styling
+    style User fill:#ffffff,stroke:#000,color:#000
+    style Slack fill:#ffffff,stroke:#000,color:#000
+    style Landing fill:#ffffff,stroke:#000,color:#000
+    style Copilot fill:#ffffff,stroke:#000,color:#000
+    style ConvMgmt fill:#ffffff,stroke:#000,color:#000
+    style Routes fill:#ffffff,stroke:#000,color:#000
+    style Actions fill:#ffffff,stroke:#000,color:#000
+    style Status fill:#ffffff,stroke:#000,color:#000
+    style ElasticClient fill:#ffffff,stroke:#000,color:#000
+    style VertexClient fill:#ffffff,stroke:#000,color:#000
+    style SlackClient fill:#ffffff,stroke:#000,color:#000
+    style Workflows fill:#ffffff,stroke:#000,color:#000
+    style Logging fill:#ffffff,stroke:#000,color:#000
+    style Metrics fill:#ffffff,stroke:#000,color:#000
+    style ESIndex fill:#ffffff,stroke:#000,color:#000
+    style ESInference fill:#ffffff,stroke:#000,color:#000
+    style Gemini fill:#ffffff,stroke:#000,color:#000
+    style Embeddings fill:#ffffff,stroke:#000,color:#000
+    style Reranking fill:#ffffff,stroke:#000,color:#000
+    style SlackAPI fill:#ffffff,stroke:#000,color:#000
+    style CloudRun fill:#ffffff,stroke:#000,color:#000
+    style SecretMgr fill:#ffffff,stroke:#000,color:#000
+    style CloudLog fill:#ffffff,stroke:#000,color:#000
 ```
 
 ## Data Flow

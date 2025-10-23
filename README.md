@@ -176,7 +176,7 @@ npm run build
 
 ## Cloud Run Deployment
 
-### 1. Build and push backend container
+### Build and push backend container
 Ensure `backend/Dockerfile` exists (see notes below). Then run:
 ```bash
 export PROJECT_ID="<gcp-project>"
@@ -200,20 +200,27 @@ gcloud run deploy ${SERVICE} \
 ```
 Mount the service-account JSON via Secret Manager or use Workload Identity Federation (recommended) instead of shipping raw keys.
 
-### 2. Build and push frontend container
-Example `frontend/Dockerfile` should run a Next.js production build and serve with `next start`:
+## Live Deployment
+
+- **Backend (Cloud Run)**: https://everydayelastic-backend-1064261519338.us-central1.run.app
+
+Quick checks:
+
 ```bash
-export FRONTEND_SERVICE="everydayelastic-frontend"
+# Health
+curl -s https://everydayelastic-backend-1064261519338.us-central1.run.app/health | jq
 
-gcloud builds submit ./frontend \
-  --tag "gcr.io/${PROJECT_ID}/${FRONTEND_SERVICE}:$(git rev-parse --short HEAD)"
-
-gcloud run deploy ${FRONTEND_SERVICE} \
-  --image "gcr.io/${PROJECT_ID}/${FRONTEND_SERVICE}:$(git rev-parse --short HEAD)" \
-  --region ${REGION} \
-  --platform managed \
-  --allow-unauthenticated \
-  --set-env-vars "NEXT_PUBLIC_API_BASE_URL=https://<backend-service-url>"
+# Slack webhook action (posts to webhook-bound channel)
+curl -s -X POST "https://everydayelastic-backend-1064261519338.us-central1.run.app/chat/actions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "slack_webhook",
+    "payload": {
+      "channel": "sev-1-war-room",
+      "message": "Cloud Run webhook test from EverydayElastic",
+      "ticket_info": {"severity":"Sev-1","status":"Investigating","owner":"On-call"}
+    }
+  }'
 ```
 
 ### 3. Post-deployment
