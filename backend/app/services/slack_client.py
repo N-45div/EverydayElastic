@@ -11,8 +11,9 @@ from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# In-memory cache for refreshed token (expires after 11 hours to be safe)
+# In-memory cache for refreshed tokens (access + refresh)
 _cached_access_token: str | None = None
+_cached_refresh_token: str | None = None
 _token_expires_at: datetime | None = None
 
 
@@ -27,7 +28,10 @@ async def _refresh_slack_token() -> str:
     """
     global _cached_access_token, _token_expires_at
     
-    if not settings.slack_refresh_token:
+    # Prefer the most recent refresh token if we have rotated once already
+    global _cached_refresh_token
+    effective_refresh_token = _cached_refresh_token or settings.slack_refresh_token
+    if not effective_refresh_token:
         raise Exception("No refresh token configured")
     
     logger.info("Refreshing Slack access token...")
@@ -35,7 +39,7 @@ async def _refresh_slack_token() -> str:
     async with aiohttp.ClientSession() as session:
         payload = {
             "grant_type": "refresh_token",
-            "refresh_token": settings.slack_refresh_token,
+            "refresh_token": effective_refresh_token,
             "client_id": settings.slack_client_id,
             "client_secret": settings.slack_client_secret,
         }
@@ -56,10 +60,17 @@ async def _refresh_slack_token() -> str:
                 new_token = data.get("access_token")
                 if not new_token:
                     raise Exception("No access token in refresh response")
+                # Capture new refresh token if provided (Slack rotates it)
+                new_refresh = data.get("refresh_token")
+                if new_refresh:
+                    _cached_refresh_token = new_refresh
                 
-                # Cache the token for 11 hours (safe margin before 12h expiry)
+                # Cache the token for ~11h (safe margin before 12h expiry)
+                expires_in = data.get("expires_in")
+                ttl = int(expires_in) if isinstance(expires_in, int) else 43200  # 12h default
+                safe_ttl = max(0, ttl - 3600)  # refresh 1h early
                 _cached_access_token = new_token
-                _token_expires_at = datetime.utcnow() + timedelta(hours=11)
+                _token_expires_at = datetime.utcnow() + timedelta(seconds=safe_ttl)
                 
                 logger.info("Slack access token refreshed successfully (expires in 11h)")
                 return new_token
@@ -86,16 +97,15 @@ async def _get_valid_access_token() -> str:
             return _cached_access_token
         logger.info("Cached token expired, refreshing...")
     
-    # Use configured token if available and no cached token
+    # Prefer refresh path when possible (ensures expired tokens are replaced)
+    if settings.slack_refresh_token or _cached_refresh_token:
+        return await _refresh_slack_token()
+
+    # Otherwise fall back to configured static token
     if settings.slack_access_token and not _cached_access_token:
-        # Initialize cache with configured token (assume fresh for 11 hours)
         _cached_access_token = settings.slack_access_token
         _token_expires_at = datetime.utcnow() + timedelta(hours=11)
         return settings.slack_access_token
-    
-    # Refresh token if we have a refresh token
-    if settings.slack_refresh_token:
-        return await _refresh_slack_token()
     
     raise Exception("No valid Slack token available and no refresh token configured")
 
@@ -220,27 +230,28 @@ async def post_slack_update(payload: dict[str, Any]) -> None:
     message = payload.get("message", "")
     ticket_info = payload.get("ticket_info")
     
-    # Try Web API first (more powerful)
-    if settings.slack_access_token:
+    # Prefer webhook posting when configured (demo-friendly and deterministic channel)
+    if settings.slack_webhook_url:
+        webhook_payload = {"text": message}
+        if ticket_info:
+            webhook_payload["text"] = f"{message}\n\nDetails: {json.dumps(ticket_info, indent=2)}"
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(settings.slack_webhook_url, json=webhook_payload, timeout=10) as response:
+                    body = await response.text()
+                    logger.info("Slack webhook responded %s: %s", response.status, body)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Slack webhook call failed: %s", exc)
+        return
+
+    # If no webhook, try Web API (requires tokens)
+    if settings.slack_access_token or settings.slack_refresh_token:
         try:
             await post_slack_message_api(channel, message, ticket_info)
             return
         except Exception as exc:
-            logger.warning("Slack Web API failed, falling back to webhook: %s", exc)
-    
-    # Fallback to webhook
-    if not settings.slack_webhook_url:
-        logger.info("[Dry-Run] Slack webhook payload: %s", json.dumps(payload))
-        return
+            logger.warning("Slack Web API failed and no webhook configured: %s", exc)
+            return
 
-    webhook_payload = {"text": message}
-    if ticket_info:
-        webhook_payload["text"] = f"{message}\n\nDetails: {json.dumps(ticket_info, indent=2)}"
-    
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.post(settings.slack_webhook_url, json=webhook_payload, timeout=10) as response:
-                body = await response.text()
-                logger.info("Slack webhook responded %s: %s", response.status, body)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Slack webhook call failed: %s", exc)
+    # Nothing configured: dry-run
+    logger.info("[Dry-Run] Slack payload (no webhook or token): %s", json.dumps(payload))
