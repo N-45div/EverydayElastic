@@ -1,0 +1,12 @@
+# frontend/cloudbuild.yaml
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/${_SERVICE}:${_TAG}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_BASE_URL=${_NEXT_PUBLIC_API_BASE_URL}'
+      - '.'
+images:
+  - 'gcr.io/$PROJECT_ID/${_SERVICE}:${_TAG}'

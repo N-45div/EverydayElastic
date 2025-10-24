@@ -15,6 +15,10 @@ WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Allow Cloud Build to inject public API base URL as a secret at build time
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -29,7 +33,7 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0
 
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY package.json ./package.json
 
