@@ -164,19 +164,9 @@ npm run dev
 
 Try asking: *"Show me Sev-1 incidents from the last 24 hours"* or *"What's the runbook for database connection failures?"*
 
-### Quality Checks (Optional)
-```bash
-cd backend
-pytest
-
-cd ../frontend
-npm run lint
-npm run build
-```
-
 ## Cloud Run Deployment
 
-### Build and push backend container
+### Build and push backend and Frontend container
 Ensure `backend/Dockerfile` exists (see notes below). Then run:
 ```bash
 export PROJECT_ID="<gcp-project>"
@@ -198,11 +188,34 @@ gcloud run deploy ${SERVICE} \
   --set-secrets "ELASTIC_ENDPOINT=elastic-endpoint:latest,ELASTIC_USERNAME=elastic-username:latest,ELASTIC_PASSWORD=elastic-password:latest,SLACK_ACCESS_TOKEN=slack-access-token:latest,SLACK_REFRESH_TOKEN=slack-refresh-token:latest,SLACK_CLIENT_ID=slack-client-id:latest,SLACK_CLIENT_SECRET=slack-client-secret:latest,SLACK_WEBHOOK_URL=slack-webhook-url:latest,DEFAULT_SLACK_CHANNEL=default-slack-channel:latest,ENABLE_TRACING=enable-tracing:latest,OTEL_EXPORTER_ENDPOINT=otel-exporter-endpoint:latest,OTEL_EXPORTER_HEADERS=otel-exporter-headers:latest,OTEL_EXPORTER_INSECURE=otel-exporter-insecure:latest" \
   --service-account "vertex-runner@${PROJECT_ID}.iam.gserviceaccount.com"
 ```
+
+Ensure `frontend/Dockerfile` exists (see notes below). Then run:
+```bash
+export FRONTEND_SERVICE="everydayelastic-frontend"
+export TAG="$(git rev-parse --short HEAD)"
+export API_BASE_URL=$(gcloud secrets versions access latest --secret=next-public-api-base-url)
+
+gcloud builds submit ./frontend \
+  --config ./frontend/cloudbuild.yaml \
+  --substitutions=_SERVICE=${FRONTEND_SERVICE},_TAG=${TAG},_NEXT_PUBLIC_API_BASE_URL="${API_BASE_URL}"
+```
+
+Deploy to Cloud Run with required environment variables and secrets:
+```bash
+gcloud run deploy ${FRONTEND_SERVICE} \
+  --image "gcr.io/${PROJECT_ID}/${FRONTEND_SERVICE}:${TAG}" \
+  --region ${REGION} \
+  --platform managed \
+  --allow-unauthenticated \
+  --service-account "elastic-vertex@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --set-secrets "NEXT_PUBLIC_API_BASE_URL=next-public-api-base-url:latest"
+```
 Mount the service-account JSON via Secret Manager or use Workload Identity Federation (recommended) instead of shipping raw keys.
 
 ## Live Deployment
 
 - **Backend (Cloud Run)**: https://everydayelastic-backend-1064261519338.us-central1.run.app
+- **Frontend (Cloud Run)**: https://everydayelastic-frontend-1064261519338.us-central1.run.app
 
 Quick checks:
 
